@@ -95,7 +95,6 @@
     // Mapping id -> track
     // -------------------------
     const tracks = [
-      const tracks = [
   "2025-ordinary.mp3",
   "2024-spider.mp3",
   "2023-talk.mp3",
