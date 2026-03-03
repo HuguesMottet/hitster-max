@@ -1,1 +1,317 @@
+<!-- force pages rebuild -->
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Max &amp; Leo</title>
 
+  <style>
+    html, body {
+      height: 100%;
+      margin: 0;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      background-image: url("assets/background2.jpeg");
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+    }
+
+    /* Voile sombre pour lisibilité */
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.55);
+      z-index: 0;
+    }
+
+    .wrap {
+      position: relative;
+      z-index: 1;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 18px;
+      text-align: center;
+      color: white;
+      padding: 24px;
+
+      /* +10% vers le bas */
+      transform: translateY(10svh);
+    }
+
+    h1 {
+      font-size: 52px;
+      font-weight: 900;
+      margin: 0;
+    }
+
+    button {
+      font-size: 22px;
+      font-weight: 900;
+      padding: 16px 28px;
+      border-radius: 16px;
+      border: none;
+      cursor: pointer;
+    }
+
+    #status {
+      font-weight: 800;
+      opacity: 0.95;
+      max-width: 420px;
+      line-height: 1.3;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="wrap">
+    <button id="play">▶ Lancer la musique</button>
+    <button id="pause" style="display:none;">⏸ Pause</button>
+
+    <h1>Max &amp; Leo</h1>
+
+    <!-- playsinline + preload pour mobile/WebView -->
+    <audio id="audio" preload="auto" playsinline>
+      <source id="srcMp3" src="" type="audio/mpeg">
+    </audio>
+
+    <div id="status"></div>
+  </div>
+
+  <script>
+    // -------------------------
+    // Paramètres URL
+    // -------------------------
+    const params = new URLSearchParams(window.location.search);
+    const autoplay = params.get("autoplay") === "1";
+    const rawId = params.get("id");
+    const id = Number.isInteger(Number(rawId)) ? Number(rawId) : null;
+
+    // -------------------------
+    // Mapping id -> track
+    // -------------------------
+    const tracks = [
+      const tracks = [
+  "2025-ordinary.mp3",
+  "2024-spider.mp3",
+  "2023-talk.mp3",
+  "2022-doja.mp3",
+  "2021-life.mp3",
+  "2020-bande.mp3",
+  "2019-ariane.mp3",
+  "2018-walk.mp3",
+  "2017-zuipen.mp3",
+  "2016-ophelia.mp3",
+  "2015-stressed.mp3",
+  "2014-barrique.mp3",
+  "2013-riptide.mp3",
+  "2012-hold.mp3",
+  "2011-somebody.mp3",
+  "2010-veux.mp3",
+  "2009-envol.mp3",
+  "2008-vida.mp3",
+  "2007-jimmy.mp3",
+  "2006-punani.mp3",
+  "2005-tommeke.mp3",
+  "2004-lyoko.mp3",
+  "2003-liberta.mp3",
+  "2002-hommes.mp3",
+  "2001-solaar.mp3",
+  "2000-slim.mp3",
+  "1999-amour.mp3",
+  "1998-back.mp3",
+  "1997-symphony.mp3",
+  "1996-freed.mp3",
+  "1995-zombie.mp3",
+  "1994-dromen.mp3",
+  "1993-crazy.mp3",
+  "1992-sex.mp3",
+  "1991-spirit.mp3",
+  "1990-ice.mp3",
+  "1989-jam.mp3",
+  "1988-child.mp3",
+  "1987-dance.mp3",
+  "1986-countdown.mp3",
+  "1985-take.mp3",
+  "1984-saimer.mp3",
+  "1983-feeling.mp3",
+  "1982-tiger.mp3",
+  "1981-believin.mp3",
+  "1980-wall.mp3",
+  "1979-sharona.mp3",
+  "1978-fever.mp3",
+  "1977-loaf.mp3",
+  "1976-child.mp3",
+  "1975-lovin.mp3",
+  "1974-jolene.mp3",
+  "1973-knockin.mp3",
+  "1972-horse.mp3",
+  "1971-broken.mp3",
+  "1970-line.mp3",
+  "1969-caroline.mp3",
+  "1968-woman.mp3",
+  "1967-emmenez.mp3",
+  "1966-vibrations.mp3"
+];
+
+    ];
+
+    const track =
+      Number.isInteger(id) && id >= 0 && id < tracks.length
+        ? tracks[id]
+        : null;
+
+    // -------------------------
+    // Masquer l’URL dans le navigateur
+    // (ne peut pas masquer dans l'app de scan QR)
+    // -------------------------
+    if (window.history.replaceState) {
+      const cleanUrl = window.location.origin + window.location.pathname;
+      window.history.replaceState({}, document.title, cleanUrl);
+    }
+
+    // -------------------------
+    // Backgrounds
+    // -------------------------
+    const backgrounds = [
+      "assets/background1.jpeg",
+      "assets/background2.jpeg",
+      "assets/background3.jpeg",
+      "assets/background4.jpeg",
+      "assets/background5.jpeg",
+    ];
+
+    if (track) {
+      const i = tracks.indexOf(track);
+      document.body.style.backgroundImage =
+        `url("${i !== -1 ? backgrounds[i % backgrounds.length] : backgrounds[1]}")`;
+    }
+
+    // -------------------------
+    // DOM
+    // -------------------------
+    const audio = document.getElementById("audio");
+    const srcMp3 = document.getElementById("srcMp3");
+    const playBtn = document.getElementById("play");
+    const pauseBtn = document.getElementById("pause");
+    const status = document.getElementById("status");
+
+    function setStatus(msg) {
+      status.textContent = msg || "";
+    }
+
+    // -------------------------
+    // Charger la piste
+    // -------------------------
+    if (!track) {
+      playBtn.textContent = "❌ piste manquante";
+      playBtn.disabled = true;
+      setStatus("Paramètre id invalide.");
+    } else {
+      const audioPath = "audio/" + track;
+      srcMp3.src = encodeURI(audioPath);
+      audio.load();
+      setStatus("");
+    }
+
+    // -------------------------
+    // Lecture robuste
+    // IMPORTANT: play() retourne une Promise qui peut être rejetée [1](https://intranet.eliagroup.eu/redir/69337)
+    // On donne du feedback UI immédiatement, puis on revert si rejet.
+    // -------------------------
+    let armedGlobalRetry = false;
+
+    async function startPlayback({ from = "button" } = {}) {
+      if (!track) return;
+
+      // Feedback immédiat
+      playBtn.style.display = "none";
+      pauseBtn.style.display = "inline-block";
+      setStatus("");
+
+      // Assure qu'on n'est pas muet (WebView parfois)
+      audio.muted = false;
+      audio.volume = 1;
+
+      try {
+        const p = audio.play();
+
+        // Certains vieux navigateurs ne renvoient pas de Promise
+        if (p && typeof p.then === "function") {
+          await p;
+        }
+
+        // Si ok, UI reste en pause
+        setStatus("");
+      } catch (e) {
+        console.log("Lecture refusée/échouée:", e);
+
+        // Revert UI
+        pauseBtn.style.display = "none";
+        playBtn.style.display = "inline-block";
+        playBtn.textContent = "▶ Lancer la musique";
+
+        // Message utilisateur
+        setStatus("👆 Touchez l’écran une fois pour activer le son, puis relancez.");
+
+        // Arme un retry “tap n'importe où” une seule fois
+        if (!armedGlobalRetry) {
+          armedGlobalRetry = true;
+
+          const retryOnce = () => {
+            // On réessaie (souvent le 2e geste marche en WebView)
+            startPlayback({ from: "globalTap" });
+          };
+
+          window.addEventListener("pointerdown", retryOnce, { once: true });
+          window.addEventListener("touchstart", retryOnce, { once: true });
+        }
+      }
+    }
+
+    // -------------------------
+    // Autoplay optionnel
+    // (souvent bloqué sur mobile; on gère le rejet)
+    // -------------------------
+    if (track && autoplay) {
+      // tentative silencieuse : si rejet, message + retry tap
+      startPlayback({ from: "autoplay" });
+    }
+
+    // -------------------------
+    // Boutons
+    // pointerdown est plus fiable que click dans certains WebView
+    // -------------------------
+    playBtn.addEventListener("pointerdown", () => startPlayback({ from: "button" }));
+    playBtn.addEventListener("click", () => startPlayback({ from: "button" }));
+
+    pauseBtn.addEventListener("pointerdown", () => {
+      audio.pause();
+      pauseBtn.style.display = "none";
+      playBtn.textContent = "▶ Reprendre";
+      playBtn.style.display = "inline-block";
+      setStatus("");
+    });
+
+    // Fin de piste
+    audio.addEventListener("ended", () => {
+      pauseBtn.style.display = "none";
+      playBtn.textContent = "▶ Rejouer";
+      playBtn.style.display = "inline-block";
+      audio.currentTime = 0;
+      setStatus("");
+    });
+
+    // Erreur audio (si jamais)
+    audio.addEventListener("error", () => {
+      setStatus("❌ Erreur audio (fichier non lisible ou problème de lecture).");
+      pauseBtn.style.display = "none";
+      playBtn.style.display = "inline-block";
+    });
+  </script>
+</body>
+</html>
